@@ -11,7 +11,7 @@ const seed = require('./seed.js');
 const prodDb = new sqlite3.Database('./database.sqlite');
 const testDb = new sqlite3.Database(process.env.TEST_DATABASE);
 
-xdescribe('Employee Table', function() {
+describe('Employee Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Employee'", (error, table) => {
       if (error || !table) {
@@ -95,7 +95,7 @@ xdescribe('Employee Table', function() {
   });
 });
 
-xdescribe('Timesheet Table', function() {
+describe('Timesheet Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Timesheet'", (error, table) => {
       if (error || !table) {
@@ -177,7 +177,7 @@ xdescribe('Timesheet Table', function() {
   });
 });
 
-xdescribe('Menu Table', function() {
+describe('Menu Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Menu'", (error, table) => {
       if (error || !table) {
