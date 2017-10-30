@@ -2,9 +2,16 @@
 
 ## Comments
 
-working environment:
+### Working environment:
 - Visual studio code with eslint and airbnb style settings
 - add automated restart scripts to package.json
+- Which npm packages should be dependencies an which dev-dependencies?
+
+
+### Steps for the task
+- set up database with migration.js, move database related stuff to db folder
+
+
 ## Project Overview
 
 In this capstone project, you will build all of the routing and database logic for an internal tool for a coffee shop called Expresso.

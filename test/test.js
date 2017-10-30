@@ -8,7 +8,7 @@ const sqlite3 = require('sqlite3');
 const app = require('../server.js');
 const seed = require('./seed.js');
 
-const prodDb = new sqlite3.Database('./database.sqlite');
+const prodDb = new sqlite3.Database('./db/database.sqlite');
 const testDb = new sqlite3.Database(process.env.TEST_DATABASE);
 
 describe('Employee Table', function() {
