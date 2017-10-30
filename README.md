@@ -1,5 +1,10 @@
 # Expresso
 
+## Comments
+
+working environment:
+- Visual studio code with eslint and airbnb style settings
+- add automated restart scripts to package.json
 ## Project Overview
 
 In this capstone project, you will build all of the routing and database logic for an internal tool for a coffee shop called Expresso.
