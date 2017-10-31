@@ -17,6 +17,12 @@ app.use(bodyParser.json());
 // logging with dev infos
 app.use(morgan('dev'));
 
+// Mount apiRouter below at the '/api' path.
+const apiRouter = require('./server/api.js');
+
+app.use('/api', apiRouter);
+
+
 // serve static content from folder 'public'
 app.use(Express.static('public'));
 

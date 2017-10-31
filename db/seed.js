@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database('./database.sqlite');
+const db = new sqlite3.Database('./db/database.sqlite');
 
 db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Employee'", (error, table) => {
   if (error) {

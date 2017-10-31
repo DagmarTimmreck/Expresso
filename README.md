@@ -10,7 +10,10 @@
 
 ### Steps for the task
 - set up database with migration.js, move database related stuff to db folder
+- set up routers
 
+### unclear
+- Why does string interpolation work only sometimes with the sql statements?
 
 ## Project Overview
 
