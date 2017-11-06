@@ -1,17 +1,18 @@
 const express = require('express');
 const sqlite3 = require('sqlite3');
+const sql = require('../db/sql');
 
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './db/database.sqlite');
 const employeesRouter = express.Router();
 
 employeesRouter.get('/', (req, res, next) => {
-  const sql = 'SELECT * FROM Employee WHERE is_current_employee = 1';
-  db.all(sql,
+  db.all(sql.getAll('Employee'),
     (error, rows) => {
       if (error) {
         next(error);
       }
       res.status(200).send({ employees: rows });
+      next();
     });
 });
 
@@ -24,26 +25,51 @@ employeesRouter.post('/', (req, res, next) => {
     const wage = newEmployee.wage;
 
     if (!name || !position || !wage) {
-      return res.sendStatus(400);
+      res.sendStatus(400);
+      return;
     }
 
-    const sql = 'INSERT INTO Employee (name, position, wage) VALUES ($name, $position, $wage)';
     const values = {
       $name: name,
       $position: position,
       $wage: wage,
     };
-    db.run(sql, values,
+
+    db.run(sql.insert('Employee'), values,
       function (error) {
         if (error) {
           next(error);
         }
-        db.get(`SELECT * FROM Employee WHERE id = ${this.lastID}`,
-          (error, row) => {
+        db.get(sql.getById('Employee', this.lastID),
+          (err, row) => {
+            if (err) {
+              next(err);
+            }
             res.status(201).send({ employee: row });
+            next();
           });
       });
   }
+});
+
+employeesRouter.param('employeeId', (req, res, next, id) => {
+  db.get(sql.getById('Employee', id),
+    (error, employee) => {
+      if (error) {
+        next(error);
+      }
+      if (employee) {
+        req.employee = employee;
+        next();
+      } else {
+        res.status(404).send();
+      }
+    });
+});
+
+employeesRouter.get('/:employeeId', (req, res, next) => {
+  res.status(200).send({ employee: req.employee });
+  next();
 });
 
 module.exports = employeesRouter;
