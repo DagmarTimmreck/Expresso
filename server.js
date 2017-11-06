@@ -22,6 +22,13 @@ const apiRouter = require('./server/api.js');
 
 app.use('/api', apiRouter);
 
+// simple error handler
+app.use((err, req, res, next) => {
+  if (!res.statusCode) {
+    res.status(500);
+  }
+  res.send(err.message);
+});
 
 // serve static content from folder 'public'
 app.use(Express.static('public'));
