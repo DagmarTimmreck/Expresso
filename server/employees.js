@@ -59,6 +59,7 @@ employeesRouter.param('employeeId', (req, res, next, id) => {
         next(error);
       }
       if (employee) {
+        req.id = id;
         req.employee = employee;
         next();
       } else {
@@ -70,6 +71,41 @@ employeesRouter.param('employeeId', (req, res, next, id) => {
 employeesRouter.get('/:employeeId', (req, res, next) => {
   res.status(200).send({ employee: req.employee });
   next();
+});
+
+employeesRouter.put('/:employeeId', (req, res, next) => {
+  const updatedEmployee = req.body && req.body.employee;
+
+  if (updatedEmployee) {
+    const name = updatedEmployee.name;
+    const position = updatedEmployee.position;
+    const wage = updatedEmployee.wage;
+
+    if (!name || !position || !wage) {
+      res.sendStatus(400);
+      return;
+    }
+
+    const values = {
+      $name: name,
+      $position: position,
+      $wage: wage,
+    };
+
+    db.run(sql.updateById('Employee', req.id), values,
+      function (error) {
+        if (error) {
+          next(error);
+        }
+        db.get(sql.getById('Employee', req.id),
+          (err, row) => {
+            if (err) {
+              next(err);
+            }
+            res.status(200).send({ employee: row });
+          });
+      });
+  }
 });
 
 module.exports = employeesRouter;

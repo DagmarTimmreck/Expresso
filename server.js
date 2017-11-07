@@ -24,10 +24,11 @@ app.use('/api', apiRouter);
 
 // simple error handler
 app.use((err, req, res, next) => {
-  if (!res.statusCode) {
+  if (!err.statusCode) {
     res.status(500);
   }
-  res.send(err.message);
+  console.log(err);
+  res.send({ message: err.message });
 });
 
 // serve static content from folder 'public'
