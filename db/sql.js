@@ -2,6 +2,10 @@ function getAll(tableName) {
   return `SELECT * FROM ${tableName} WHERE is_current_employee = 1;`;
 }
 
+function getAllByForeignKey(tableName, key) {
+  return `SELECT * FROM ${tableName} WHERE employee_id = ${key};`;
+}
+
 function getById(tableName, id) {
   return `SELECT * FROM ${tableName} WHERE id = ${id};`;
 }
@@ -32,6 +36,7 @@ function deleteById(tableName, id) {
 
 module.exports = {
   getAll,
+  getAllByForeignKey,
   getById,
   updateById,
   deleteById,

@@ -1,6 +1,7 @@
 const express = require('express');
 const sqlite3 = require('sqlite3');
 const sql = require('../db/sql');
+const timesheetsRouter = require('./timesheets');
 
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './db/database.sqlite');
 const employeesRouter = express.Router();
@@ -16,6 +17,8 @@ employeesRouter.get('/', (req, res, next) => {
     });
 });
 
+// middleware for routes that expect an employee object on req.body
+// checks whether all necessary fields are present
 function validateEmployee(req, res, next) {
   const reqEmployee = req.body && req.body.employee;
 
@@ -38,10 +41,6 @@ function validateEmployee(req, res, next) {
   }
 }
 
-function getEmployeeById(req, res, next) {
-  
-}
-
 employeesRouter.post('/', validateEmployee, (req, res, next) => {
   db.run(sql.insert('Employee'), req.values,
     function (error) {
@@ -59,6 +58,7 @@ employeesRouter.post('/', validateEmployee, (req, res, next) => {
     });
 });
 
+// check whether the employee with the id from the route exists in the database
 employeesRouter.param('employeeId', (req, res, next, id) => {
   db.get(sql.getById('Employee', id),
     (error, employee) => {
@@ -66,7 +66,7 @@ employeesRouter.param('employeeId', (req, res, next, id) => {
         next(error);
       }
       if (employee) {
-        req.id = id;
+        req.employeeId = id;
         req.employee = employee;
         next();
       } else {
@@ -75,18 +75,20 @@ employeesRouter.param('employeeId', (req, res, next, id) => {
     });
 });
 
+employeesRouter.use('/:employeeId/timesheets', timesheetsRouter);
+
 employeesRouter.get('/:employeeId', (req, res, next) => {
   res.status(200).send({ employee: req.employee });
   next();
 });
 
 employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
-  db.run(sql.updateById('Employee', req.id), req.values,
+  db.run(sql.updateById('Employee', req.employeeId), req.values,
     function (error) {
       if (error) {
         next(error);
       }
-      db.get(sql.getById('Employee', req.id),
+      db.get(sql.getById('Employee', req.employeeId),
         (err, row) => {
           if (err) {
             next(err);
@@ -97,12 +99,12 @@ employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
 });
 
 employeesRouter.delete('/:employeeId', (req, res, next) => {
-  db.run(sql.deleteById('Employee', req.id),
+  db.run(sql.deleteById('Employee', req.employeeId),
     function (error) {
       if (error) {
         next(error);
       } else {
-        db.get(sql.getById('Employee', req.id),
+        db.get(sql.getById('Employee', req.employeeId),
         (err, row) => {
           if (err) {
             next(err);
