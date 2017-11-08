@@ -217,7 +217,7 @@ describe('Menu Table', function() {
   });
 });
 
-xdescribe('MenuItem Table', function() {
+describe('MenuItem Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='MenuItem'", (error, table) => {
       if (error || !table) {
@@ -299,7 +299,7 @@ xdescribe('MenuItem Table', function() {
   });
 });
 
-xdescribe('GET /api/employees', function() {
+describe('GET /api/employees', function() {
   before(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -323,38 +323,8 @@ xdescribe('GET /api/employees', function() {
   });
 });
 
-xdescribe('GET /api/employees/:id', function() {
-  before(function(done) {
-    seed.seedEmployeeDatabase(done);
-  });
 
-  it('should return the employee with the given ID', function() {
-    return request(app)
-        .get('/api/employees/2')
-        .then(function(response) {
-          const employee = response.body.employee;
-          expect(employee.id).to.equal(2);
-          expect(employee.name).to.equal('Employee 2');
-          expect(employee.position).to.equal('Employee');
-          expect(employee.wage).to.equal(15);
-          expect(employee.is_current_employee).to.equal(1);
-        });
-  });
-
-  it('should return a 200 status code for valid IDs', function() {
-    return request(app)
-        .get('/api/employees/2')
-        .expect(200);
-  });
-
-  it('should return a 404 status code for invalid IDs', function() {
-    return request(app)
-        .get('/api/employees/999')
-        .expect(404);
-  });
-});
-
-xdescribe('POST /api/employees', function() {
+describe('POST /api/employees', function() {
   let newEmployee;
 
   beforeEach(function(done) {
@@ -425,8 +395,38 @@ xdescribe('POST /api/employees', function() {
   });
 });
 
+describe('GET /api/employees/:id', function() {
+  before(function(done) {
+    seed.seedEmployeeDatabase(done);
+  });
 
-xdescribe('PUT /api/employees/:id', function() {
+  it('should return the employee with the given ID', function() {
+    return request(app)
+        .get('/api/employees/2')
+        .then(function(response) {
+          const employee = response.body.employee;
+          expect(employee.id).to.equal(2);
+          expect(employee.name).to.equal('Employee 2');
+          expect(employee.position).to.equal('Employee');
+          expect(employee.wage).to.equal(15);
+          expect(employee.is_current_employee).to.equal(1);
+        });
+  });
+
+  it('should return a 200 status code for valid IDs', function() {
+    return request(app)
+        .get('/api/employees/2')
+        .expect(200);
+  });
+
+  it('should return a 404 status code for invalid IDs', function() {
+    return request(app)
+        .get('/api/employees/999')
+        .expect(404);
+  });
+});
+
+describe('PUT /api/employees/:id', function() {
   let updatedEmployee;
 
   beforeEach(function(done) {
@@ -490,9 +490,16 @@ xdescribe('PUT /api/employees/:id', function() {
         .send({employee: updatedEmployee})
         .expect(400);
   });
+
+  it('should return a 404 status code for invalid IDs', function() {
+    return request(app)
+        .put('/api/employees/999')
+        .send()
+        .expect(404);
+  });
 });
 
-xdescribe('DELETE /api/employees/:id', function() {
+describe('DELETE /api/employees/:id', function() {
   beforeEach(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -526,6 +533,12 @@ xdescribe('DELETE /api/employees/:id', function() {
           expect(employee.id).to.equal(1);
           expect(employee.is_current_employee).to.equal(0);
         });
+  });
+
+  it('should return a 404 status code for invalid IDs', function() {
+    return request(app)
+        .del('/api/employees/999')
+        .expect(404);
   });
 });
 
