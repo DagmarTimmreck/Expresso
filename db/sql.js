@@ -26,9 +26,14 @@ function insert(tableName) {
   return `INSERT INTO ${tableName} ${columns()} VALUES ${values()};`;
 }
 
+function deleteById(tableName, id) {
+  return `UPDATE ${tableName} SET is_current_employee = 0 WHERE id = ${id};`;
+}
+
 module.exports = {
   getAll,
   getById,
   updateById,
+  deleteById,
   insert,
 };

@@ -16,7 +16,6 @@ employeesRouter.get('/', (req, res, next) => {
     });
 });
 
-
 function validateEmployee(req, res, next) {
   const reqEmployee = req.body && req.body.employee;
 
@@ -39,8 +38,11 @@ function validateEmployee(req, res, next) {
   }
 }
 
-employeesRouter.post('/', validateEmployee, (req, res, next) => {
+function getEmployeeById(req, res, next) {
+  
+}
 
+employeesRouter.post('/', validateEmployee, (req, res, next) => {
   db.run(sql.insert('Employee'), req.values,
     function (error) {
       if (error) {
@@ -55,7 +57,7 @@ employeesRouter.post('/', validateEmployee, (req, res, next) => {
           next();
         });
     });
-  });
+});
 
 employeesRouter.param('employeeId', (req, res, next, id) => {
   db.get(sql.getById('Employee', id),
@@ -91,6 +93,23 @@ employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
           }
           res.status(200).send({ employee: row });
         });
+    });
+});
+
+employeesRouter.delete('/:employeeId', (req, res, next) => {
+  db.run(sql.deleteById('Employee', req.id),
+    function (error) {
+      if (error) {
+        next(error);
+      } else {
+        db.get(sql.getById('Employee', req.id),
+        (err, row) => {
+          if (err) {
+            next(err);
+          }
+          res.status(200).send({ employee: row });
+        });
+      }
     });
 });
 
