@@ -8,11 +8,11 @@ const employeesRouter = express.Router();
 
 employeesRouter.get('/', (req, res, next) => {
   db.all(sql.getAll('Employee'),
-    (error, rows) => {
+    (error, employees) => {
       if (error) {
         next(error);
       }
-      res.status(200).send({ employees: rows });
+      res.status(200).send({ employees });
       next();
     });
 });
@@ -23,19 +23,19 @@ function validateEmployee(req, res, next) {
   const reqEmployee = req.body && req.body.employee;
 
   if (reqEmployee) {
-    const name = reqEmployee.name;
-    const position = reqEmployee.position;
-    const wage = reqEmployee.wage;
+    const $name = reqEmployee.name;
+    const $position = reqEmployee.position;
+    const $wage = reqEmployee.wage;
 
-    if (!name || !position || !wage) {
+    if (!$name || !$position || !$wage) {
       res.sendStatus(400);
       return;
     }
 
     req.values = {
-      $name: name,
-      $position: position,
-      $wage: wage,
+      $name,
+      $position,
+      $wage,
     };
     next();
   }
@@ -48,11 +48,11 @@ employeesRouter.post('/', validateEmployee, (req, res, next) => {
         next(error);
       }
       db.get(sql.getById('Employee', this.lastID),
-        (err, row) => {
+        (err, employee) => {
           if (err) {
             next(err);
           }
-          res.status(201).send({ employee: row });
+          res.status(201).send({ employee });
           next();
         });
     });
@@ -78,7 +78,8 @@ employeesRouter.param('employeeId', (req, res, next, id) => {
 employeesRouter.use('/:employeeId/timesheets', timesheetsRouter);
 
 employeesRouter.get('/:employeeId', (req, res, next) => {
-  res.status(200).send({ employee: req.employee });
+  const employee = req.employee;
+  res.status(200).send({ employee });
   next();
 });
 
@@ -89,11 +90,11 @@ employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
         next(error);
       }
       db.get(sql.getById('Employee', req.employeeId),
-        (err, row) => {
+        (err, employee) => {
           if (err) {
             next(err);
           }
-          res.status(200).send({ employee: row });
+          res.status(200).send({ employee });
         });
     });
 });
@@ -105,11 +106,11 @@ employeesRouter.delete('/:employeeId', (req, res, next) => {
         next(error);
       } else {
         db.get(sql.getById('Employee', req.employeeId),
-        (err, row) => {
+        (err, employee) => {
           if (err) {
             next(err);
           }
-          res.status(200).send({ employee: row });
+          res.status(200).send({ employee });
         });
       }
     });

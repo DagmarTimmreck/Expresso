@@ -8,59 +8,62 @@ const timesheetsRouter = express.Router({ mergeParams: true });
 timesheetsRouter.get('/', (req, res, next) => {
   console.log(req.employeeId);
   db.all(sql.getAllByForeignKey('Timesheet', req.employeeId),
-    (error, rows) => {
+    (error, timesheets) => {
       if (error) {
         next(error);
       }
-      res.status(200).send({ timesheets: rows });
+      res.status(200).send({ timesheets });
       next();
     });
 });
 
-// // middleware for routes that expect an employee object on req.body
-// // checks whether all necessary fields are present
-// function validateEmployee(req, res, next) {
-//   const reqEmployee = req.body && req.body.employee;
+// middleware for routes that expect a timesheet object on req.body
+// checks whether all necessary fields are present
+function validateTimesheet(req, res, next) {
+  const reqTimesheet = req.body && req.body.timesheet;
 
-//   if (reqEmployee) {
-//     const name = reqEmployee.name;
-//     const position = reqEmployee.position;
-//     const wage = reqEmployee.wage;
+  if (reqTimesheet) {
+    const $hours = reqTimesheet.hours;
+    const $date = reqTimesheet.date;
+    const $rate = reqTimesheet.rate;
+    const $employeeId = reqTimesheet.employeeId || req.employeeId;
 
-//     if (!name || !position || !wage) {
-//       res.sendStatus(400);
-//       return;
-//     }
+    if (!$hours || !$date || !$rate || $employeeId !== req.employeeId) {
+      res.sendStatus(400);
+      return;
+    }
 
-//     req.values = {
-//       $name: name,
-//       $position: position,
-//       $wage: wage,
-//     };
-//     next();
-//   }
-// }
+    req.values = {
+      $hours,
+      $date,
+      $rate,
+      $employeeId,
+    };
+    next();
+  }
+}
 
-// employeesRouter.post('/', validateEmployee, (req, res, next) => {
-//   db.run(sql.insert('Employee'), req.values,
-//     function (error) {
-//       if (error) {
-//         next(error);
-//       }
-//       db.get(sql.getById('Employee', this.lastID),
-//         (err, row) => {
-//           if (err) {
-//             next(err);
-//           }
-//           res.status(201).send({ employee: row });
-//           next();
-//         });
-//     });
-// });
+timesheetsRouter.post('/', validateTimesheet, (req, res, next) => {
+  req.values.$employeeId = req.employeeId;
+  db.run(sql.insert('Timesheet'), req.values,
+    function (error) {
+      if (error) {
+        next(error);
+      }
+      db.get(sql.getById('Timesheet', this.lastID),
+        (err, timesheet) => {
+          if (err) {
+            next(err);
+          }
+          res.status(201).send({ timesheet });
+          next();
+        });
+    });
+});
 
 // // check whether the employee with the id from the route exists in the database
-// employeesRouter.param('employeeId', (req, res, next, id) => {
-//   db.get(sql.getById('Employee', id),
+// timesheetsRouter.param('employeeId', (req, res, next, id) => {
+//   db.get(sql.getById('Timesheet', id),
 //     (error, employee) => {
 //       if (error) {
 //         next(error);
@@ -75,39 +78,39 @@ timesheetsRouter.get('/', (req, res, next) => {
 //     });
 // });
 
-// employeesRouter.get('/:employeeId', (req, res, next) => {
+// timesheetsRouter.get('/:employeeId', (req, res, next) => {
 //   res.status(200).send({ employee: req.employee });
 //   next();
 // });
 
-// employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
-//   db.run(sql.updateById('Employee', req.id), req.values,
+// timesheetsRouter.put('/:employeeId', validateTimesheet, (req, res, next) => {
+//   db.run(sql.updateById('Timesheet', req.id), req.values,
 //     function (error) {
 //       if (error) {
 //         next(error);
 //       }
-//       db.get(sql.getById('Employee', req.id),
-//         (err, row) => {
+//       db.get(sql.getById('Timesheet', req.id),
+//         (err, timesheet) => {
 //           if (err) {
 //             next(err);
 //           }
-//           res.status(200).send({ employee: row });
+//           res.status(200).send({ employee: timesheet });
 //         });
 //     });
 // });
 
-// employeesRouter.delete('/:employeeId', (req, res, next) => {
-//   db.run(sql.deleteById('Employee', req.id),
+// timesheetsRouter.delete('/:employeeId', (req, res, next) => {
+//   db.run(sql.deleteById('Timesheet', req.id),
 //     function (error) {
 //       if (error) {
 //         next(error);
 //       } else {
-//         db.get(sql.getById('Employee', req.id),
-//         (err, row) => {
+//         db.get(sql.getById('Timesheet', req.id),
+//         (err, timesheet) => {
 //           if (err) {
 //             next(err);
 //           }
-//           res.status(200).send({ employee: row });
+//           res.status(200).send({ employee: timesheet });
 //         });
 //       }
 //     });

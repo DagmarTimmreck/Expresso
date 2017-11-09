@@ -18,16 +18,22 @@ function updateById(tableName, id) {
   return `UPDATE ${tableName} SET ${settings()} WHERE id = ${id};`;
 }
 
-function columns() {
+function columns(tableName) {
+  if (tableName === 'Timesheet') {
+    return '(hours, rate, date, employee_id)';
+  }
   return '(name, position, wage)';
 }
 
-function values() {
+function values(tableName) {
+  if (tableName === 'Timesheet') {
+    return '($hours, $rate, $date, $employeeId)';
+  }
   return '($name, $position, $wage)';
 }
 
 function insert(tableName) {
-  return `INSERT INTO ${tableName} ${columns()} VALUES ${values()};`;
+  return `INSERT INTO ${tableName} ${columns(tableName)} VALUES ${values(tableName)};`;
 }
 
 function deleteById(tableName, id) {
