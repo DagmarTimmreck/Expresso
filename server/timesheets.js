@@ -6,7 +6,6 @@ const db = new sqlite3.Database(process.env.TEST_DATABASE || './db/database.sqli
 const timesheetsRouter = express.Router({ mergeParams: true });
 
 timesheetsRouter.get('/', (req, res, next) => {
-  console.log(req.employeeId);
   db.all(sql.getAllByForeignKey('Timesheet', req.employeeId),
     (error, timesheets) => {
       if (error) {
@@ -26,9 +25,10 @@ function validateTimesheet(req, res, next) {
     const $hours = reqTimesheet.hours;
     const $date = reqTimesheet.date;
     const $rate = reqTimesheet.rate;
-    const $employeeId = reqTimesheet.employeeId || req.employeeId;
+    const $employeeId = reqTimesheet.employeeId || (req.timesheet && req.timesheet.employee_id) || req.employeeId;
+    const $id = reqTimesheet.id || req.id;
 
-    if (!$hours || !$date || !$rate || $employeeId !== req.employeeId) {
+    if (!$hours || !$date || !$rate || $employeeId !== req.employeeId || $id !== req.id) {
       res.sendStatus(400);
       return;
     }
@@ -61,43 +61,38 @@ timesheetsRouter.post('/', validateTimesheet, (req, res, next) => {
     });
 });
 
-// // check whether the employee with the id from the route exists in the database
-// timesheetsRouter.param('employeeId', (req, res, next, id) => {
-//   db.get(sql.getById('Timesheet', id),
-//     (error, employee) => {
-//       if (error) {
-//         next(error);
-//       }
-//       if (employee) {
-//         req.id = id;
-//         req.employee = employee;
-//         next();
-//       } else {
-//         res.status(404).send();
-//       }
-//     });
-// });
+// check whether the timesheet with the id from the route exists in the database
+timesheetsRouter.param('timesheetId', (req, res, next, id) => {
+  db.get(sql.getById('Timesheet', id),
+    (error, timesheet) => {
+      if (error) {
+        next(error);
+      }
+      if (timesheet) {
+        req.id = id;
+        req.timesheet = timesheet;
+        next();
+      } else {
+        res.status(404).send();
+      }
+    });
+});
 
-// timesheetsRouter.get('/:employeeId', (req, res, next) => {
-//   res.status(200).send({ employee: req.employee });
-//   next();
-// });
-
-// timesheetsRouter.put('/:employeeId', validateTimesheet, (req, res, next) => {
-//   db.run(sql.updateById('Timesheet', req.id), req.values,
-//     function (error) {
-//       if (error) {
-//         next(error);
-//       }
-//       db.get(sql.getById('Timesheet', req.id),
-//         (err, timesheet) => {
-//           if (err) {
-//             next(err);
-//           }
-//           res.status(200).send({ employee: timesheet });
-//         });
-//     });
-// });
+timesheetsRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
+  db.run(sql.updateById('Timesheet', req.id), req.values,
+    function (error) {
+      if (error) {
+        next(error);
+      }
+      db.get(sql.getById('Timesheet', req.id),
+        (err, timesheet) => {
+          if (err) {
+            next(err);
+          }
+          res.status(200).send({ timesheet });
+        });
+    });
+});
 
 // timesheetsRouter.delete('/:employeeId', (req, res, next) => {
 //   db.run(sql.deleteById('Timesheet', req.id),

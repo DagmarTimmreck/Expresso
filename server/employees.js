@@ -66,7 +66,7 @@ employeesRouter.param('employeeId', (req, res, next, id) => {
         next(error);
       }
       if (employee) {
-        req.employeeId = id;
+        req.employeeId = Number(id);
         req.employee = employee;
         next();
       } else {

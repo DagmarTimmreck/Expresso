@@ -1,3 +1,8 @@
+const dbStructure = {
+  Employee: ['name', 'position', 'wage'],
+  Timesheet: ['hours', 'rate', 'date', 'employee_id'],
+};
+
 function getAll(tableName) {
   return `SELECT * FROM ${tableName} WHERE is_current_employee = 1;`;
 }
@@ -10,12 +15,15 @@ function getById(tableName, id) {
   return `SELECT * FROM ${tableName} WHERE id = ${id};`;
 }
 
-function settings() {
+function settings(tableName) {
+  if (tableName === 'Timesheet') {
+    return 'hours= $hours, rate = $rate, date = $date, employee_id = $employeeId';
+  }
   return 'name = $name, position = $position, wage = $wage';
 }
 
 function updateById(tableName, id) {
-  return `UPDATE ${tableName} SET ${settings()} WHERE id = ${id};`;
+  return `UPDATE ${tableName} SET ${settings(tableName)} WHERE id = ${id};`;
 }
 
 function columns(tableName) {
