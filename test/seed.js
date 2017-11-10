@@ -28,9 +28,9 @@ function seedTimesheetDatabase(done) {
                '`employee_id` INTEGER NOT NULL, ' +
                'PRIMARY KEY(`id`), ' +
                'FOREIGN KEY(`employee_id`) REFERENCES `Employee`(`id`) )');
-    db.run("INSERT INTO Timesheet (id, hours, rate, date, employee_id) VALUES (1, 10, 15.5, 1506100907820, 1)");
+    db.run("INSERT INTO Timesheet (id, hours, rate, date, employee_id) VALUES (1, 10, 15.5, 1506100907820, 2)");
     db.run("INSERT INTO Timesheet (id, hours, rate, date, employee_id) VALUES (2, 20, 15.5, 1506100907821, 1)");
-    db.run("INSERT INTO Timesheet (id, hours, rate, date, employee_id) VALUES (3, 10, 15.5, 1506100907823, 2)", done);
+    db.run("INSERT INTO Timesheet (id, hours, rate, date, employee_id) VALUES (3, 10, 15.5, 1506100907823, 1)", done);
   });
 }
 

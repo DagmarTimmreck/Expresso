@@ -11,7 +11,7 @@ const seed = require('./seed.js');
 const prodDb = new sqlite3.Database('./db/database.sqlite');
 const testDb = new sqlite3.Database(process.env.TEST_DATABASE);
 
-describe('Employee Table', function() {
+xdescribe('Employee Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Employee'", (error, table) => {
       if (error || !table) {
@@ -95,7 +95,7 @@ describe('Employee Table', function() {
   });
 });
 
-describe('Timesheet Table', function() {
+xdescribe('Timesheet Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Timesheet'", (error, table) => {
       if (error || !table) {
@@ -177,7 +177,7 @@ describe('Timesheet Table', function() {
   });
 });
 
-describe('Menu Table', function() {
+xdescribe('Menu Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Menu'", (error, table) => {
       if (error || !table) {
@@ -217,7 +217,7 @@ describe('Menu Table', function() {
   });
 });
 
-describe('MenuItem Table', function() {
+xdescribe('MenuItem Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='MenuItem'", (error, table) => {
       if (error || !table) {
@@ -299,7 +299,7 @@ describe('MenuItem Table', function() {
   });
 });
 
-describe('GET /api/employees', function() {
+xdescribe('GET /api/employees', function() {
   before(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -324,7 +324,7 @@ describe('GET /api/employees', function() {
 });
 
 
-describe('POST /api/employees', function() {
+xdescribe('POST /api/employees', function() {
   let newEmployee;
 
   beforeEach(function(done) {
@@ -395,7 +395,7 @@ describe('POST /api/employees', function() {
   });
 });
 
-describe('GET /api/employees/:id', function() {
+xdescribe('GET /api/employees/:id', function() {
   before(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -426,7 +426,7 @@ describe('GET /api/employees/:id', function() {
   });
 });
 
-describe('PUT /api/employees/:id', function() {
+xdescribe('PUT /api/employees/:id', function() {
   let updatedEmployee;
 
   beforeEach(function(done) {
@@ -499,7 +499,7 @@ describe('PUT /api/employees/:id', function() {
   });
 });
 
-describe('DELETE /api/employees/:id', function() {
+xdescribe('DELETE /api/employees/:id', function() {
   beforeEach(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -542,7 +542,7 @@ describe('DELETE /api/employees/:id', function() {
   });
 });
 
-xdescribe('GET /api/employees/:employeeId/timesheets', function() {
+describe('GET /api/employees/:employeeId/timesheets', function() {
   before(function(done) {
     seed.seedTimesheetDatabase(done);
   });
@@ -553,8 +553,8 @@ xdescribe('GET /api/employees/:employeeId/timesheets', function() {
         .then(function(response) {
           const timesheets = response.body.timesheets;
           expect(timesheets.length).to.equal(2);
-          expect(timesheets.find(timesheet => timesheet.id === 1)).to.exist;
           expect(timesheets.find(timesheet => timesheet.id === 2)).to.exist;
+          expect(timesheets.find(timesheet => timesheet.id === 3)).to.exist;
         });
   });
 
@@ -580,7 +580,7 @@ xdescribe('GET /api/employees/:employeeId/timesheets', function() {
       });
 });
 
-xdescribe('POST /api/employees/:employeeId/timesheets', function() {
+describe('POST /api/employees/:employeeId/timesheets', function() {
   let newTimesheet;
 
   beforeEach(function(done) {
@@ -644,8 +644,9 @@ xdescribe('POST /api/employees/:employeeId/timesheets', function() {
         .expect(400);
   });
 
-  it('should return a 400 status code if an employee with the timesheet\'s employee ID doesn\'t exist', function() {
+  it('should return a 400 status code if the route\'s employee ID doesn\'t coincide with the timesheet\'s employee ID', function() {
     newTimesheet = {
+      hours: 10,
       rate: 3.5,
       date: 100,
       employeeId: 100
@@ -656,9 +657,22 @@ xdescribe('POST /api/employees/:employeeId/timesheets', function() {
         .send({timesheet: newTimesheet})
         .expect(400);
   });
+
+  it('should return a 404 status code if an employee with the timesheet\'s employee ID doesn\'t exist', function() {
+    newTimesheet = {
+      hours: 10,
+      rate: 3.5,
+      date: 100
+    };
+
+    return request(app)
+        .post('/api/employees/100/timesheets')
+        .send({timesheet: newTimesheet})
+        .expect(404);
+  });
 });
 
-xdescribe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
+describe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
   let updatedTimesheet;
 
   beforeEach(function(done) {
@@ -715,6 +729,7 @@ xdescribe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
 
   it('should return a 404 status code for invalid timesheet IDs', function() {
     updatedTimesheet = {
+      hours: 20,
       rate: 3.5,
       date: 100
     };
@@ -749,6 +764,48 @@ xdescribe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
         .send({timesheet: updatedTimesheet})
         .expect(404);
   });
+
+  it('should return a 400 status code if the employee ID from the route doesn\'t  coincide with the employee ID from body.timesheet', function() {
+    updatedTimesheet = {
+      hours: 20,
+      rate: 3.5,
+      date: 100,
+      employeeId: 1,
+    };
+
+    return request(app)
+        .put('/api/employees/2/timesheets/1')
+        .send({timesheet: updatedTimesheet})
+        .expect(400);
+  });
+
+  it('should return a 400 status code if the timesheet ID from the route doesn\'t  coincide with the timesheet ID from body.timesheet', function() {
+    updatedTimesheet = {
+      id: 1,
+      hours: 20,
+      rate: 3.5,
+      date: 100,
+    };
+
+    return request(app)
+        .put('/api/employees/2/timesheets/1')
+        .send({timesheet: updatedTimesheet})
+        .expect(400);
+  });
+
+  it('should return a 400 status code if the employee ID from the route doesn\'t  coincide with the employee ID from the database', function() {
+    updatedTimesheet = {
+      hours: 20,
+      rate: 3.5,
+      date: 100,
+    };
+
+    return request(app)
+        .put('/api/employees/1/timesheets/1')
+        .send({timesheet: updatedTimesheet})
+        .expect(400);
+  });
+
 });
 
 xdescribe('DELETE /api/employees/:employeeId/timesheets/:timesheetId', function() {
