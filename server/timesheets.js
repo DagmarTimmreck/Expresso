@@ -94,21 +94,15 @@ timesheetsRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
     });
 });
 
-// timesheetsRouter.delete('/:employeeId', (req, res, next) => {
-//   db.run(sql.deleteById('Timesheet', req.id),
-//     function (error) {
-//       if (error) {
-//         next(error);
-//       } else {
-//         db.get(sql.getById('Timesheet', req.id),
-//         (err, timesheet) => {
-//           if (err) {
-//             next(err);
-//           }
-//           res.status(200).send({ employee: timesheet });
-//         });
-//       }
-//     });
-// });
+timesheetsRouter.delete('/:timesheetId', (req, res, next) => {
+  db.run(sql.deleteById('Timesheet', req.id),
+    function (error) {
+      if (error) {
+        next(error);
+      } else {
+        res.sendStatus(204);
+      }
+    });
+});
 
 module.exports = timesheetsRouter;

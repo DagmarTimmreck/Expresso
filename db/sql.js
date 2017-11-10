@@ -1,3 +1,5 @@
+const toCamelCase = require('to-camel-case');
+
 const dbStructure = {
   Employee: ['name', 'position', 'wage'],
   Timesheet: ['hours', 'rate', 'date', 'employee_id'],
@@ -16,10 +18,7 @@ function getById(tableName, id) {
 }
 
 function settings(tableName) {
-  if (tableName === 'Timesheet') {
-    return 'hours= $hours, rate = $rate, date = $date, employee_id = $employeeId';
-  }
-  return 'name = $name, position = $position, wage = $wage';
+  return dbStructure[tableName].map(columnName => `${columnName} = $${toCamelCase(columnName)}`).join(', ');
 }
 
 function updateById(tableName, id) {
@@ -27,25 +26,24 @@ function updateById(tableName, id) {
 }
 
 function columns(tableName) {
-  if (tableName === 'Timesheet') {
-    return '(hours, rate, date, employee_id)';
-  }
-  return '(name, position, wage)';
+  return dbStructure[tableName].join(', ');
 }
 
 function values(tableName) {
-  if (tableName === 'Timesheet') {
-    return '($hours, $rate, $date, $employeeId)';
-  }
-  return '($name, $position, $wage)';
+  return dbStructure[tableName].map(columnName => `$${toCamelCase(columnName)}`).join(', ');
 }
 
 function insert(tableName) {
-  return `INSERT INTO ${tableName} ${columns(tableName)} VALUES ${values(tableName)};`;
+  return `INSERT INTO ${tableName} (${columns(tableName)}) VALUES (${values(tableName)});`;
 }
 
 function deleteById(tableName, id) {
-  return `UPDATE ${tableName} SET is_current_employee = 0 WHERE id = ${id};`;
+  if (tableName === 'Employee') {
+    return `UPDATE ${tableName} SET is_current_employee = 0 WHERE id = ${id};`;
+  }
+  if (tableName === 'Timesheet') {
+    return `DELETE FROM ${tableName} WHERE id = ${id};`;
+  }
 }
 
 module.exports = {
