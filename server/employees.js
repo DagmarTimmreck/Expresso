@@ -48,9 +48,9 @@ employeesRouter.post('/', validateEmployee, (req, res, next) => {
         next(error);
       }
       db.get(sql.getById('Employee', this.lastID),
-        (err, employee) => {
-          if (err) {
-            next(err);
+        (error, employee) => {
+          if (error) {
+            next(error);
           }
           res.status(201).send({ employee });
           next();
@@ -90,9 +90,9 @@ employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
         next(error);
       }
       db.get(sql.getById('Employee', req.employeeId),
-        (err, employee) => {
-          if (err) {
-            next(err);
+        (error, employee) => {
+          if (error) {
+            next(error);
           }
           res.status(200).send({ employee });
         });
@@ -106,9 +106,9 @@ employeesRouter.delete('/:employeeId', (req, res, next) => {
         next(error);
       } else {
         db.get(sql.getById('Employee', req.employeeId),
-        (err, employee) => {
-          if (err) {
-            next(err);
+        (error, employee) => {
+          if (error) {
+            next(error);
           }
           res.status(200).send({ employee });
         });

@@ -1,3 +1,4 @@
+inconsistent 'menu items' property in spec menuItems in tests
 # Expresso
 
 ## Comments
@@ -5,15 +6,41 @@
 ### Working environment:
 - Visual studio code with eslint and airbnb style settings
 - add automated restart scripts to package.json
-- Which npm packages should be dependencies an which dev-dependencies?
+- Which npm packages should be dependencies and which dev-dependencies?
+
+### Specification
+- PUT/POST routes may get some id in the route and on the posted object. The id on the object is not needed but may be supplied because the API is used with an object that contains the id anyway. This is only a problem if the ids don't coincide. In that case the data is considered invalid and a 400 response is sent. 
+
+### Tests
+- change order of tests to match order in spec
+- add/amend tests for
+  - PUT /api/employees/:id should return a 404 status code for invalid IDs
+  - DELETE /api/employees/:id should return a 404 status code for invalid IDs
+  - POST /api/employees/:employeeId/timesheets should return a 404 status code if an employee with the timesheet's employee ID doesn't exist (based on the employeeId provided in the route)
+  - POST /api/employees/:employeeId/timesheets should return a 400 status code if the route\'s employee ID doesn\'t coincide with the timesheet\'s employee ID (as the supplied timesheet is incorrect in this case)
+  - make sure in the tests for POST /api/employees/:employeeId/timesheets routes that when testing for an incorrect timesheet only the incorrectness under test is incorrect
+  - PUT /api/employees/:employeeId/timesheets/:timeshettId 
+     -- should return a 400 status code if the employee ID from the route doesn't  coincide with the employee ID from req.body.timesheet
+     -- should return a 400 status code if the timesheet ID from the route doesn't  coincide with the timesheet ID from req.body.timesheet
+     -- should return a 400 status code if the employee ID from the route doesn't  coincide with the employee ID from the database
 
 
-### Steps for the task
-- set up database with migration.js, move database related stuff to db folder
-- set up routers
+### Notes on express:
+- res.send() does not automatically return from a function
+- nor does calling next() (Program resumes where it left off when calling next only next(error) leaves the function for good.)
+- default status code seems to be 200 
+
+### ToDo or not to do...
+- switch from values syntax to string interpolation beforehand? => in sql.js iterate over attributes of value settings
+- refactor req.body checks?
+- the routers look so much the same. How to DRY?
+- refactor away passing on errors
+- database check after operation? Also into function?
 
 ### unclear
 - Why does string interpolation work only sometimes with the sql statements?
+- How do express and sqlite work together and how to get rid of nested callbacks.
+- How can I move all the database logic to a different file? Returning Promises with retrieved database data and related stuff? Still not clear on that one :( node-sqlite?
 
 ## Project Overview
 

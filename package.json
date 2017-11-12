@@ -21,6 +21,7 @@
     "react-router-dom": "^4.2.2",
     "sqlite3": "^3.1.13",
     "supertest": "^3.0.0",
+    "to-camel-case": "^1.0.0",
     "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {

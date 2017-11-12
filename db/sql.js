@@ -3,14 +3,18 @@ const toCamelCase = require('to-camel-case');
 const dbStructure = {
   Employee: ['name', 'position', 'wage'],
   Timesheet: ['hours', 'rate', 'date', 'employee_id'],
+  Menu: ['title'],
+  MenuItem: ['name', 'description', 'inventory', 'price', 'menu_id'],
 };
 
 function getAll(tableName) {
-  return `SELECT * FROM ${tableName} WHERE is_current_employee = 1;`;
+  const whereClause = tableName === 'Employee' ? 'WHERE is_current_employee = 1' : '';
+  return `SELECT * FROM ${tableName} ${whereClause};`;
 }
 
 function getAllByForeignKey(tableName, key) {
-  return `SELECT * FROM ${tableName} WHERE employee_id = ${key};`;
+  const keyName = dbStructure[tableName][dbStructure[tableName].length - 1];
+  return `SELECT * FROM ${tableName} WHERE ${keyName} = ${key};`;
 }
 
 function getById(tableName, id) {
@@ -41,9 +45,7 @@ function deleteById(tableName, id) {
   if (tableName === 'Employee') {
     return `UPDATE ${tableName} SET is_current_employee = 0 WHERE id = ${id};`;
   }
-  if (tableName === 'Timesheet') {
-    return `DELETE FROM ${tableName} WHERE id = ${id};`;
-  }
+  return `DELETE FROM ${tableName} WHERE id = ${id};`;
 }
 
 module.exports = {

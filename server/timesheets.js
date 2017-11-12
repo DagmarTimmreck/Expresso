@@ -51,9 +51,9 @@ timesheetsRouter.post('/', validateTimesheet, (req, res, next) => {
         next(error);
       }
       db.get(sql.getById('Timesheet', this.lastID),
-        (err, timesheet) => {
-          if (err) {
-            next(err);
+        (error, timesheet) => {
+          if (error) {
+            next(error);
           }
           res.status(201).send({ timesheet });
           next();
@@ -85,9 +85,9 @@ timesheetsRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
         next(error);
       }
       db.get(sql.getById('Timesheet', req.id),
-        (err, timesheet) => {
-          if (err) {
-            next(err);
+        (error, timesheet) => {
+          if (error) {
+            next(error);
           }
           res.status(200).send({ timesheet });
         });
