@@ -11,7 +11,7 @@ const seed = require('./seed.js');
 const prodDb = new sqlite3.Database('./db/database.sqlite');
 const testDb = new sqlite3.Database(process.env.TEST_DATABASE);
 
-xdescribe('Employee Table', function() {
+describe('Employee Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Employee'", (error, table) => {
       if (error || !table) {
@@ -95,7 +95,7 @@ xdescribe('Employee Table', function() {
   });
 });
 
-xdescribe('Timesheet Table', function() {
+describe('Timesheet Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Timesheet'", (error, table) => {
       if (error || !table) {
@@ -177,7 +177,7 @@ xdescribe('Timesheet Table', function() {
   });
 });
 
-xdescribe('Menu Table', function() {
+describe('Menu Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='Menu'", (error, table) => {
       if (error || !table) {
@@ -217,7 +217,7 @@ xdescribe('Menu Table', function() {
   });
 });
 
-xdescribe('MenuItem Table', function() {
+describe('MenuItem Table', function() {
   it('should exist', function(done) {
     prodDb.get("SELECT name FROM sqlite_master WHERE type='table' AND name='MenuItem'", (error, table) => {
       if (error || !table) {
@@ -299,7 +299,7 @@ xdescribe('MenuItem Table', function() {
   });
 });
 
-xdescribe('GET /api/employees', function() {
+describe('GET /api/employees', function() {
   before(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -324,7 +324,7 @@ xdescribe('GET /api/employees', function() {
 });
 
 
-xdescribe('POST /api/employees', function() {
+describe('POST /api/employees', function() {
   let newEmployee;
 
   beforeEach(function(done) {
@@ -395,7 +395,7 @@ xdescribe('POST /api/employees', function() {
   });
 });
 
-xdescribe('GET /api/employees/:id', function() {
+describe('GET /api/employees/:id', function() {
   before(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -426,7 +426,7 @@ xdescribe('GET /api/employees/:id', function() {
   });
 });
 
-xdescribe('PUT /api/employees/:id', function() {
+describe('PUT /api/employees/:id', function() {
   let updatedEmployee;
 
   beforeEach(function(done) {
@@ -499,7 +499,7 @@ xdescribe('PUT /api/employees/:id', function() {
   });
 });
 
-xdescribe('DELETE /api/employees/:id', function() {
+describe('DELETE /api/employees/:id', function() {
   beforeEach(function(done) {
     seed.seedEmployeeDatabase(done);
   });
@@ -666,7 +666,7 @@ describe('POST /api/employees/:employeeId/timesheets', function() {
     };
 
     return request(app)
-        .post('/api/employees/100/timesheets')
+        .post('/api/employees/999/timesheets')
         .send({timesheet: newTimesheet})
         .expect(404);
   });
@@ -727,6 +727,18 @@ describe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
         });
   });
 
+  it('should return a 400 status code for invalid timesheet updates', function() {
+    updatedTimesheet = {
+      rate: 3.5,
+      date: 100
+    };
+
+    return request(app)
+        .put('/api/employees/2/timesheets/1')
+        .send({timesheet: updatedTimesheet})
+        .expect(400);
+  });
+
   it('should return a 404 status code for invalid timesheet IDs', function() {
     updatedTimesheet = {
       hours: 20,
@@ -738,18 +750,6 @@ describe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
         .put('/api/employees/2/timesheets/999')
         .send({timesheet: updatedTimesheet})
         .expect(404);
-  });
-
-  it('should return a 400 status code for invalid timesheet updates', function() {
-    updatedTimesheet = {
-      rate: 3.5,
-      date: 100
-    };
-
-    return request(app)
-        .put('/api/employees/2/timesheets/1')
-        .send({timesheet: updatedTimesheet})
-        .expect(400);
   });
 
   it('should return a 404 status code if an employee with the updated employee ID doesn\'t exist', function() {
@@ -765,7 +765,7 @@ describe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
         .expect(404);
   });
 
-  it('should return a 400 status code if the employee ID from the route doesn\'t  coincide with the employee ID from body.timesheet', function() {
+  it('should return a 400 status code if the employee ID from the route doesn\'t  coincide with the employee ID from req.body.timesheet', function() {
     updatedTimesheet = {
       hours: 20,
       rate: 3.5,
@@ -779,7 +779,7 @@ describe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
         .expect(400);
   });
 
-  it('should return a 400 status code if the timesheet ID from the route doesn\'t  coincide with the timesheet ID from body.timesheet', function() {
+  it('should return a 400 status code if the timesheet ID from the route doesn\'t  coincide with the timesheet ID from req.body.timesheet', function() {
     updatedTimesheet = {
       id: 1,
       hours: 20,
@@ -808,7 +808,7 @@ describe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
 
 });
 
-xdescribe('DELETE /api/employees/:employeeId/timesheets/:timesheetId', function() {
+describe('DELETE /api/employees/:employeeId/timesheets/:timesheetId', function() {
   beforeEach(function(done) {
     seed.seedTimesheetDatabase(done);
   });
@@ -833,6 +833,12 @@ xdescribe('DELETE /api/employees/:employeeId/timesheets/:timesheetId', function(
         .expect(204);
   });
 
+  it('should return a 404 status code for invalid employee IDs', function() {
+    return request(app)
+        .del('/api/employees/999/timesheets/2')
+        .expect(404);
+  });
+
   it('should return a 404 status code for invalid timesheet IDs', function() {
     return request(app)
         .del('/api/employees/2/timesheets/999')
@@ -840,7 +846,7 @@ xdescribe('DELETE /api/employees/:employeeId/timesheets/:timesheetId', function(
   });
 });
 
-xdescribe('GET /api/menus', function() {
+describe('GET /api/menus', function() {
   before(function(done) {
     seed.seedMenuDatabase(done);
   });
@@ -864,35 +870,7 @@ xdescribe('GET /api/menus', function() {
   });
 });
 
-xdescribe('GET /api/menus/:id', function() {
-  before(function(done) {
-    seed.seedMenuDatabase(done);
-  });
-
-  it('should return the menus with the given ID', function() {
-    return request(app)
-        .get('/api/menus/2')
-        .then(function(response) {
-          const menu = response.body.menu;
-          expect(menu.id).to.equal(2);
-          expect(menu.title).to.equal('Lunch');
-        });
-  });
-
-  it('should return a 200 status code for valid IDs', function() {
-    return request(app)
-        .get('/api/menus/2')
-        .expect(200);
-  });
-
-  it('should return a 404 status code for invalid IDs', function() {
-    return request(app)
-        .get('/api/menus/999')
-        .expect(404);
-  });
-});
-
-xdescribe('POST /api/menus', function() {
+describe('POST /api/menus', function() {
   let newMenu;
 
   beforeEach(function(done) {
@@ -942,9 +920,38 @@ xdescribe('POST /api/menus', function() {
         .send({menu: {}})
         .expect(400);
   });
+
 });
 
-xdescribe('PUT /api/menus/:id', function() {
+describe('GET /api/menus/:id', function() {
+  before(function(done) {
+    seed.seedMenuDatabase(done);
+  });
+
+  it('should return the menus with the given ID', function() {
+    return request(app)
+        .get('/api/menus/2')
+        .then(function(response) {
+          const menu = response.body.menu;
+          expect(menu.id).to.equal(2);
+          expect(menu.title).to.equal('Lunch');
+        });
+  });
+
+  it('should return a 200 status code for valid IDs', function() {
+    return request(app)
+        .get('/api/menus/2')
+        .expect(200);
+  });
+
+  it('should return a 404 status code for invalid IDs', function() {
+    return request(app)
+        .get('/api/menus/999')
+        .expect(404);
+  });
+});
+
+describe('PUT /api/menus/:id', function() {
   let updatedMenu;
 
   beforeEach(function(done) {
@@ -997,9 +1004,17 @@ xdescribe('PUT /api/menus/:id', function() {
         .send({menu: {}})
         .expect(400);
   });
+
+  it('should return a 404 status code for invalid IDs', function() {
+    return request(app)
+        .put('/api/menus/999')
+        .send()
+        .expect(404);
+  });
+
 });
 
-xdescribe('DELETE /api/menus/:id', function() {
+describe('DELETE /api/menus/:id', function() {
   beforeEach(function(done) {
     seed.seedMenuDatabase(done);
   });
@@ -1038,14 +1053,21 @@ xdescribe('DELETE /api/menus/:id', function() {
         }).catch(done);
   });
 
-  it('should not return a 400 status code if deleted menu has existing related menu items', function() {
+  it('should return a 400 status code if deleted menu has existing related menu items', function() {
     return request(app)
         .del('/api/menus/2')
         .expect(400);
   });
+
+  it('should return a 404 status code for invalid IDs', function() {
+    return request(app)
+        .del('/api/menus/999')
+        .expect(404);
+  });
+
 });
 
-xdescribe('GET /api/menus/:menuId/menu-items', function() {
+describe('GET /api/menus/:menuId/menu-items', function() {
   before(function(done) {
     seed.seedMenuItemDatabase(done);
   });
@@ -1083,7 +1105,7 @@ xdescribe('GET /api/menus/:menuId/menu-items', function() {
       });
 });
 
-xdescribe('POST /api/menus/:menuId/menu-items', function() {
+describe('POST /api/menus/:menuId/menu-items', function() {
   let newMenuItem;
 
   beforeEach(function(done) {
@@ -1150,9 +1172,32 @@ xdescribe('POST /api/menus/:menuId/menu-items', function() {
         .send({menuItem: newMenuItem})
         .expect(400);
   });
+
+  it('should return a 400 status code if the route\'s menu ID doesn\'t coincide with the menuItem\'s menu ID', function() {
+    newMenuItem = {
+      name: 'New Menu Item',
+      description: 'New Description',
+      inventory: 20,
+      price: 1.5,
+      menuId: 1,
+    };
+
+    return request(app)
+        .post('/api/menus/2/menu-items')
+        .send({menuItem: newMenuItem})
+        .expect(400);
+  });
+
+  it('should return a 404 status code if a menu with the menuItem\'s menu ID doesn\'t exist', function() {
+
+    return request(app)
+        .post('/api/menus/999/menu-items')
+        .send({menuItem: newMenuItem})
+        .expect(404);
+  });
 });
 
-xdescribe('PUT /api/menus/:menuId/menu-items/:menuItemId', function() {
+describe('PUT /api/menus/:menuId/menu-items/:menuItemId', function() {
   let updatedMenuItem;
 
   beforeEach(function(done) {
@@ -1208,6 +1253,19 @@ xdescribe('PUT /api/menus/:menuId/menu-items/:menuItemId', function() {
         });
   });
 
+  it('should return a 400 status code for invalid menu item updates', function() {
+    updatedMenuItem = {
+      description: 'Updated Description',
+      inventory: 20,
+      price: 1.5
+    };
+
+    return request(app)
+        .put('/api/menus/1/menu-items/2')
+        .send({menuItem: updatedMenuItem})
+        .expect(400);
+  });
+  
   it('should return a 404 status code for invalid menu item IDs', function() {
     updatedMenuItem = {
       description: 'Updated Description',
@@ -1221,7 +1279,7 @@ xdescribe('PUT /api/menus/:menuId/menu-items/:menuItemId', function() {
         .expect(404);
   });
 
-  it('should return a 400 status code for invalid menu item updates', function() {
+  it('should return a 404 status code for invalid menu IDs', function() {
     updatedMenuItem = {
       description: 'Updated Description',
       inventory: 20,
@@ -1229,13 +1287,54 @@ xdescribe('PUT /api/menus/:menuId/menu-items/:menuItemId', function() {
     };
 
     return request(app)
+        .put('/api/menus/999/menu-items/1')
+        .send({menuItem: updatedMenuItem})
+        .expect(404);
+  });
+
+  it('should return a 400 status code if the menu ID from the route doesn\'t coincide with the menu ID from req.body.menuItem', function() {
+    updatedMenuItem = {
+      description: 'Updated Description',
+      inventory: 20,
+      price: 1.5,
+      menuId: 2
+    };
+
+    return request(app)
         .put('/api/menus/1/menu-items/2')
+        .send({menuItem: updatedMenuItem})
+        .expect(400);
+  });
+
+  it('should return a 400 status code if the menuItem ID from the route doesn\'t coincide with the menuItem ID from req.body.menuItem', function() {
+    updatedMenuItem = {
+      id: 1,
+      description: 'Updated Description',
+      inventory: 20,
+      price: 1.5 
+    };
+
+    return request(app)
+        .put('/api/menus/1/menu-items/2')
+        .send({menuItem: updatedMenuItem})
+        .expect(400);
+  });
+
+  it('should return a 400 status code if the menu ID from the route doesn\'t coincide with the menu ID from the database', function() {
+    updatedMenuItem = {
+      description: 'Updated Description',
+      inventory: 20,
+      price: 1.5,
+    };
+
+    return request(app)
+        .put('/api/menus/2/menu-items/2')
         .send({menuItem: updatedMenuItem})
         .expect(400);
   });
 });
 
-xdescribe('DELETE /api/menus/:menuId/menu-items/:menuItemId', function() {
+describe('DELETE /api/menus/:menuId/menu-items/:menuItemId', function() {
   beforeEach(function(done) {
     seed.seedMenuItemDatabase(done);
   });
@@ -1258,6 +1357,12 @@ xdescribe('DELETE /api/menus/:menuId/menu-items/:menuItemId', function() {
     return request(app)
         .del('/api/menus/1/menu-items/2')
         .expect(204);
+  });
+
+  it('should return a 404 status code for invalid menu IDs', function() {
+    return request(app)
+        .del('/api/menus/999/menu-items/1')
+        .expect(404);
   });
 
   it('should return a 404 status code for invalid menu item IDs', function() {

@@ -19,10 +19,21 @@ inconsistent 'menu items' property in spec menuItems in tests
   - POST /api/employees/:employeeId/timesheets should return a 404 status code if an employee with the timesheet's employee ID doesn't exist (based on the employeeId provided in the route)
   - POST /api/employees/:employeeId/timesheets should return a 400 status code if the route\'s employee ID doesn\'t coincide with the timesheet\'s employee ID (as the supplied timesheet is incorrect in this case)
   - make sure in the tests for POST /api/employees/:employeeId/timesheets routes that when testing for an incorrect timesheet only the incorrectness under test is incorrect
-  - PUT /api/employees/:employeeId/timesheets/:timeshettId 
+  - PUT /api/employees/:employeeId/timesheets/:timesheetId 
      -- should return a 400 status code if the employee ID from the route doesn't  coincide with the employee ID from req.body.timesheet
      -- should return a 400 status code if the timesheet ID from the route doesn't  coincide with the timesheet ID from req.body.timesheet
      -- should return a 400 status code if the employee ID from the route doesn't  coincide with the employee ID from the database
+     - DELETE /api/employees/:employeeId/timesheets/:id should return a 404 status code for invalid employee IDs
+  - PUT /api/menus/:id should return a 404 status code for invalid IDs
+  - DELETE /api/menus/:id should return a 404 status code for invalid IDs
+  - POST /api/menus/:menuId/menu-items
+    -- should return a 400 status code if the route\'s menu ID doesn\'t coincide with the menuItem\'s menu ID
+    -- should return a 404 status code if a menu with the menuItem\'s menu ID doesn\'t exist
+  - PUT /api/menus/:menuId/menu-items/:menuItemId 
+     -- should return a 400 status code if the menu ID from the route doesn't  coincide with the menu ID from req.body.menuItem
+     -- should return a 400 status code if the menu-item ID from the route doesn't  coincide with the timesheet ID from req.body.menuItem
+     -- should return a 400 status code if the menu ID from the route doesn't  coincide with the menu ID from the database
+  - DELETE /api/menus/:menuId/menu-items/:id should return a 404 status code for invalid menu IDs
 
 
 ### Notes on express:
