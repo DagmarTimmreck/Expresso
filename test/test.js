@@ -781,7 +781,7 @@ describe('PUT /api/employees/:employeeId/timesheets/:timesheetId', function() {
 
   it('should return a 400 status code if the timesheet ID from the route doesn\'t  coincide with the timesheet ID from req.body.timesheet', function() {
     updatedTimesheet = {
-      id: 1,
+      id: 2,
       hours: 20,
       rate: 3.5,
       date: 100,
