@@ -78,19 +78,21 @@ menusRouter.get('/:menuId', (req, res, next) => {
 });
 
 menusRouter.put('/:menuId', validateMenu, (req, res, next) => {
-  db.run(sql.updateById('Menu', req.menuId), req.values,
-    function (error) {
-      if (error) {
-        next(error);
-      }
-      db.get(sql.getById('Menu', req.menuId),
-        (error, menu) => {
-          if (error) {
-            next(error);
-          }
-          res.status(200).send({ menu });
-        });
-    });
+  db.serialize(() => {
+    db.run(sql.updateById('Menu', req.menuId), req.values,
+      function (error) {
+        if (error) {
+          next(error);
+        }
+      });
+    db.get(sql.getById('Menu', req.menuId),
+      (error, menu) => {
+        if (error) {
+          next(error);
+        }
+        res.status(200).send({ menu });
+      });
+  });
 });
 
 menusRouter.delete('/:menuId', (req, res, next) => {

@@ -26,9 +26,9 @@ function validateTimesheet(req, res, next) {
     const $date = reqTimesheet.date;
     const $rate = reqTimesheet.rate;
     const $employeeId = reqTimesheet.employeeId || (req.timesheet && req.timesheet.employee_id) || req.employeeId;
-    const $id = reqTimesheet.id || req.id;
+    const $id = reqTimesheet.id || req.timesheetId;
 
-    if (!$hours || !$date || !$rate || $employeeId !== req.employeeId || $id !== req.id) {
+    if (!$hours || !$date || !$rate || $employeeId !== req.employeeId || $id !== req.timesheetId) {
       res.sendStatus(400);
       return;
     }
@@ -69,7 +69,7 @@ timesheetsRouter.param('timesheetId', (req, res, next, id) => {
         next(error);
       }
       if (timesheet) {
-        req.id = id;
+        req.timesheetId = Number(id);
         req.timesheet = timesheet;
         next();
       } else {
@@ -79,23 +79,25 @@ timesheetsRouter.param('timesheetId', (req, res, next, id) => {
 });
 
 timesheetsRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
-  db.run(sql.updateById('Timesheet', req.id), req.values,
-    function (error) {
-      if (error) {
-        next(error);
-      }
-      db.get(sql.getById('Timesheet', req.id),
-        (error, timesheet) => {
-          if (error) {
-            next(error);
-          }
-          res.status(200).send({ timesheet });
-        });
-    });
+  db.serialize(() => {
+    db.run(sql.updateById('Timesheet', req.timesheetId), req.values,
+      function (error) {
+        if (error) {
+          next(error);
+        }
+      });
+    db.get(sql.getById('Timesheet', req.timesheetId),
+      (error, timesheet) => {
+        if (error) {
+          next(error);
+        }
+        res.status(200).send({ timesheet });
+      });
+  });
 });
 
 timesheetsRouter.delete('/:timesheetId', (req, res, next) => {
-  db.run(sql.deleteById('Timesheet', req.id),
+  db.run(sql.deleteById('Timesheet', req.timesheetId),
     function (error) {
       if (error) {
         next(error);

@@ -27,17 +27,16 @@ function validateEmployee(req, res, next) {
     const $position = reqEmployee.position;
     const $wage = reqEmployee.wage;
 
-    if (!$name || !$position || !$wage) {
+    if ($name && $position && $wage) {
+      req.values = {
+        $name,
+        $position,
+        $wage,
+      };
+      next();
+    } else {
       res.sendStatus(400);
-      return;
     }
-
-    req.values = {
-      $name,
-      $position,
-      $wage,
-    };
-    next();
   }
 }
 
@@ -47,7 +46,8 @@ employeesRouter.post('/', validateEmployee, (req, res, next) => {
       if (error) {
         next(error);
       }
-      db.get(sql.getById('Employee', this.lastID),
+      req.employeeId = this.lastID;
+      db.get(sql.getById('Employee', req.employeeId),
         (error, employee) => {
           if (error) {
             next(error);
@@ -84,36 +84,39 @@ employeesRouter.get('/:employeeId', (req, res, next) => {
 });
 
 employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
-  db.run(sql.updateById('Employee', req.employeeId), req.values,
-    function (error) {
-      if (error) {
-        next(error);
-      }
-      db.get(sql.getById('Employee', req.employeeId),
-        (error, employee) => {
-          if (error) {
-            next(error);
-          }
-          res.status(200).send({ employee });
-        });
-    });
+  db.serialize(() => {
+    db.run(sql.updateById('Employee', req.employeeId), req.values,
+      (error) => {
+        if (error) {
+          next(error);
+        }
+      });
+    db.get(sql.getById('Employee', req.employeeId),
+      (error, employee) => {
+        if (error) {
+          next(error);
+        }
+        res.status(200).send({ employee });
+      });
+  });
 });
 
 employeesRouter.delete('/:employeeId', (req, res, next) => {
-  db.run(sql.deleteById('Employee', req.employeeId),
-    function (error) {
-      if (error) {
-        next(error);
-      } else {
-        db.get(sql.getById('Employee', req.employeeId),
-        (error, employee) => {
-          if (error) {
-            next(error);
-          }
-          res.status(200).send({ employee });
-        });
-      }
-    });
+  db.serialize(() => {
+    db.run(sql.deleteById('Employee', req.employeeId),
+      function (error) {
+        if (error) {
+          next(error);
+        }
+      });
+    db.get(sql.getById('Employee', req.employeeId),
+      (error, employee) => {
+        if (error) {
+          next(error);
+        }
+        res.status(200).send({ employee });
+      });
+  });
 });
 
 module.exports = employeesRouter;
