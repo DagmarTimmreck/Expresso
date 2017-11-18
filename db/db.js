@@ -109,18 +109,22 @@ function deleteById(tableName, id) {
   }
   if (tableName === 'Menu') {
     return new Promise((resolve, reject) => {
-      db.getAllByForeignKey('MenuItem', id)
-      .then((menuItem) => {
-        if (menuItem) {
-          resolve(false);
+      db.get(sql.getAllByForeignKey('MenuItem', id),
+      (error, menuItem) => {
+        if (error) {
+          reject(error);
         }
-        db.run(sql.deleteById(tableName, id),
-          (error) => {
-            if (error) {
-              reject(error);
-            }
-            resolve(null);
-          });
+        if (menuItem) {
+          resolve(menuItem);
+        } else {
+          db.run(sql.deleteById(tableName, id),
+            (error) => {
+              if (error) {
+                reject(error);
+              }
+              resolve(null);
+            });
+        }
       });
     });
   }

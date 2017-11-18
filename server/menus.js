@@ -63,11 +63,9 @@ menusRouter.put('/:menuId', validateMenu, (req, res, next) => {
 });
 
 menusRouter.delete('/:menuId', (req, res, next) => {
-
-  // this should be handled on the database level
   db.deleteById('Menu', req.menuId)
-  .then((success) => {
-    if (!success) {
+  .then((result) => {
+    if (!result) {
       res.sendStatus(204);
     } else {
       res.sendStatus(400);
