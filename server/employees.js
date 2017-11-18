@@ -7,10 +7,7 @@ const employeesRouter = express.Router();
 
 employeesRouter.get('/', (req, res, next) => {
   db.getAll('Employee')
-    .then((employees) => {
-      res.status(200).send({ employees });
-      next();
-    })
+    .then(employees => res.status(200).send({ employees }))
     .catch(error => next(error));
 });
 
@@ -40,10 +37,7 @@ function validateEmployee(req, res, next) {
 
 employeesRouter.post('/', validateEmployee, (req, res, next) => {
   db.insert('Employee', req.values)
-  .then((employee) => {
-    res.status(201).send({ employee });
-    next();
-  })
+  .then(employee => res.status(201).send({ employee }))
   .catch(error => next(error));
 });
 
@@ -67,22 +61,17 @@ employeesRouter.use('/:employeeId/timesheets', timesheetsRouter);
 employeesRouter.get('/:employeeId', (req, res, next) => {
   const employee = req.employee;
   res.status(200).send({ employee });
-  next();
 });
 
 employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
   db.updateById('Employee', req.employeeId, req.values)
-  .then((employee) => {
-    res.status(200).send({ employee });
-  })
+  .then(employee => res.status(200).send({ employee }))
   .catch(error => next(error));
 });
 
 employeesRouter.delete('/:employeeId', (req, res, next) => {
   db.deleteById('Employee', req.employeeId)
-  .then((employee) => {
-    res.status(200).send({ employee });
-  })
+  .then(employee => res.status(200).send({ employee }))
   .catch(error => next(error));
 });
 

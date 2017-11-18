@@ -84,23 +84,54 @@ function insert(tableName, values) {
 }
 
 // returns the 'deleted row' (either marked as deleted or empty) wrapped in a promise
+// should behave differently for the different tables -> deleteById maps to an Array of different methods
+
+
 function deleteById(tableName, id) {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run(sql.deleteById(tableName, id),
-        function (error) {
-          if (error) {
-            reject(error);
-          }
-        });
-      db.get(sql.getById(tableName, id),
-        (error, row) => {
-          if (error) {
-            reject(error);
-          }
-          resolve(row);
-        });
+  if (tableName === 'Employee') {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run(sql.deleteById(tableName, id),
+          (error) => {
+            if (error) {
+              reject(error);
+            }
+          });
+        db.get(sql.getById(tableName, id),
+          (error, row) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(row);
+          });
+      });
     });
+  }
+  if (tableName === 'Menu') {
+    return new Promise((resolve, reject) => {
+      db.getAllByForeignKey('MenuItem', id)
+      .then((menuItem) => {
+        if (menuItem) {
+          resolve(false);
+        }
+        db.run(sql.deleteById(tableName, id),
+          (error) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(null);
+          });
+      });
+    });
+  }
+  return new Promise((resolve, reject) => {
+    db.run(sql.deleteById(tableName, id),
+      (error) => {
+        if (error) {
+          reject(error);
+        }
+        resolve({});
+      });
   });
 }
 

@@ -5,10 +5,7 @@ const timesheetsRouter = express.Router({ mergeParams: true });
 
 timesheetsRouter.get('/', (req, res, next) => {
   db.getAllByForeignKey('Timesheet', req.employeeId)
-  .then((timesheets) => {
-    res.status(200).send({ timesheets });
-    next();
-  })
+  .then(timesheets => res.status(200).send({ timesheets }))
   .catch(error => next(error));
 });
 
@@ -43,10 +40,7 @@ function validateTimesheet(req, res, next) {
 timesheetsRouter.post('/', validateTimesheet, (req, res, next) => {
   req.values.$employeeId = req.employeeId;
   db.insert('Timesheet', req.values)
-  .then((timesheet) => {
-    res.status(201).send({ timesheet });
-    next();
-  })
+  .then(timesheet => res.status(201).send({ timesheet }))
   .catch(error => next(error));
 });
 
@@ -67,17 +61,13 @@ timesheetsRouter.param('timesheetId', (req, res, next, id) => {
 
 timesheetsRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
   db.updateById('Timesheet', req.timesheetId, req.values)
-  .then((timesheet) => {
-    res.status(200).send({ timesheet });
-  })
+  .then(timesheet => res.status(200).send({ timesheet }))
   .catch(error => next(error));
 });
 
 timesheetsRouter.delete('/:timesheetId', (req, res, next) => {
   db.deleteById('Timesheet', req.timesheetId)
-  .then(() => {
-    res.sendStatus(204);
-  })
+  .then(() => res.sendStatus(204))
   .catch(error => next(error));
 });
 

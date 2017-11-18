@@ -1,20 +1,13 @@
 const express = require('express');
-const sqlite3 = require('sqlite3');
-const sql = require('../db/sql');
+const db = require('../db/db');
 const menuItemsRouter = require('./menuItems');
 
-const db = new sqlite3.Database(process.env.TEST_DATABASE || './db/database.sqlite');
 const menusRouter = express.Router();
 
 menusRouter.get('/', (req, res, next) => {
-  db.all(sql.getAll('Menu'),
-    (error, menus) => {
-      if (error) {
-        next(error);
-      }
-      res.status(200).send({ menus });
-      next();
-    });
+  db.getAll('Menu')
+  .then(menus =>res.status(200).send({ menus }))
+  .catch(error => next(error));
 });
 
 // middleware for routes that expect an menu object on req.body
@@ -36,37 +29,24 @@ function validateMenu(req, res, next) {
 }
 
 menusRouter.post('/', validateMenu, (req, res, next) => {
-  db.run(sql.insert('Menu'), req.values,
-    function (error) {
-      if (error) {
-        next(error);
-      }
-      db.get(sql.getById('Menu', this.lastID),
-        (error, menu) => {
-          if (error) {
-            next(error);
-          }
-          res.status(201).send({ menu });
-          next();
-        });
-    });
+  db.insert('Menu', req.values)
+  .then(menu => res.status(201).send({ menu }))
+  .catch(error => next(error));
 });
 
 // check whether the menu with the id from the route exists in the database
 menusRouter.param('menuId', (req, res, next, id) => {
-  db.get(sql.getById('Menu', id),
-    (error, menu) => {
-      if (error) {
-        next(error);
-      }
-      if (menu) {
-        req.menuId = Number(id);
-        req.menu = menu;
-        next();
-      } else {
-        res.status(404).send();
-      }
-    });
+  db.getById('Menu', id)
+  .then((menu) => {
+    if (menu) {
+      req.menuId = Number(id);
+      req.menu = menu;
+      next();
+    } else {
+      res.status(404).send();
+    }
+  })
+  .catch(error => next(error));
 });
 
 menusRouter.use('/:menuId/menu-items', menuItemsRouter);
@@ -74,46 +54,26 @@ menusRouter.use('/:menuId/menu-items', menuItemsRouter);
 menusRouter.get('/:menuId', (req, res, next) => {
   const menu = req.menu;
   res.status(200).send({ menu });
-  next();
 });
 
 menusRouter.put('/:menuId', validateMenu, (req, res, next) => {
-  db.serialize(() => {
-    db.run(sql.updateById('Menu', req.menuId), req.values,
-      function (error) {
-        if (error) {
-          next(error);
-        }
-      });
-    db.get(sql.getById('Menu', req.menuId),
-      (error, menu) => {
-        if (error) {
-          next(error);
-        }
-        res.status(200).send({ menu });
-      });
-  });
+  db.updateById('Menu', req.menuId, req.values)
+  .then(menu => res.status(200).send({ menu }))
+  .catch(error => next(error));
 });
 
 menusRouter.delete('/:menuId', (req, res, next) => {
-  db.get(sql.getAllByForeignKey('MenuItem', req.menuId),
-    (error, menuItem) => {
-      if (error) {
-        next(error);
-      }
-      if (!menuItem) {
-        db.run(sql.deleteById('Menu', req.menuId),
-        (error) => {
-          if (error) {
-            next(error);
-          }
-          res.sendStatus(204);
-          next();
-        });
-      } else {
-        res.sendStatus(400);
-      }
-    });
+
+  // this should be handled on the database level
+  db.deleteById('Menu', req.menuId)
+  .then((success) => {
+    if (!success) {
+      res.sendStatus(204);
+    } else {
+      res.sendStatus(400);
+    }
+  })
+  .catch(error => next(error));
 });
 
 module.exports = menusRouter;
