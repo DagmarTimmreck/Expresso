@@ -1,24 +1,22 @@
 const express = require('express');
-const sqlite3 = require('sqlite3');
-const sql = require('../db/sql');
+const db = require('../db/db');
 const timesheetsRouter = require('./timesheets');
 
-const db = new sqlite3.Database(process.env.TEST_DATABASE || './db/database.sqlite');
 const employeesRouter = express.Router();
 
+
 employeesRouter.get('/', (req, res, next) => {
-  db.all(sql.getAll('Employee'),
-    (error, employees) => {
-      if (error) {
-        next(error);
-      }
+  db.getAll('Employee')
+    .then((employees) => {
       res.status(200).send({ employees });
       next();
-    });
+    })
+    .catch(error => next(error));
 });
 
 // middleware for routes that expect an employee object on req.body
 // checks whether all necessary fields are present
+// and prepares them for sql
 function validateEmployee(req, res, next) {
   const reqEmployee = req.body && req.body.employee;
 
@@ -41,38 +39,27 @@ function validateEmployee(req, res, next) {
 }
 
 employeesRouter.post('/', validateEmployee, (req, res, next) => {
-  db.run(sql.insert('Employee'), req.values,
-    function (error) {
-      if (error) {
-        next(error);
-      }
-      req.employeeId = this.lastID;
-      db.get(sql.getById('Employee', req.employeeId),
-        (error, employee) => {
-          if (error) {
-            next(error);
-          }
-          res.status(201).send({ employee });
-          next();
-        });
-    });
+  db.insert('Employee', req.values)
+  .then((employee) => {
+    res.status(201).send({ employee });
+    next();
+  })
+  .catch(error => next(error));
 });
 
 // check whether the employee with the id from the route exists in the database
 employeesRouter.param('employeeId', (req, res, next, id) => {
-  db.get(sql.getById('Employee', id),
-    (error, employee) => {
-      if (error) {
-        next(error);
-      }
-      if (employee) {
-        req.employeeId = Number(id);
-        req.employee = employee;
-        next();
-      } else {
-        res.status(404).send();
-      }
-    });
+  db.getById('Employee', id)
+  .then((employee) => {
+    if (employee) {
+      req.employeeId = Number(id);
+      req.employee = employee;
+      next();
+    } else {
+      res.status(404).send();
+    }
+  })
+  .catch(error => next(error));
 });
 
 employeesRouter.use('/:employeeId/timesheets', timesheetsRouter);
@@ -84,39 +71,19 @@ employeesRouter.get('/:employeeId', (req, res, next) => {
 });
 
 employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
-  db.serialize(() => {
-    db.run(sql.updateById('Employee', req.employeeId), req.values,
-      (error) => {
-        if (error) {
-          next(error);
-        }
-      });
-    db.get(sql.getById('Employee', req.employeeId),
-      (error, employee) => {
-        if (error) {
-          next(error);
-        }
-        res.status(200).send({ employee });
-      });
-  });
+  db.updateById('Employee', req.employeeId, req.values)
+  .then((employee) => {
+    res.status(200).send({ employee });
+  })
+  .catch(error => next(error));
 });
 
 employeesRouter.delete('/:employeeId', (req, res, next) => {
-  db.serialize(() => {
-    db.run(sql.deleteById('Employee', req.employeeId),
-      function (error) {
-        if (error) {
-          next(error);
-        }
-      });
-    db.get(sql.getById('Employee', req.employeeId),
-      (error, employee) => {
-        if (error) {
-          next(error);
-        }
-        res.status(200).send({ employee });
-      });
-  });
+  db.deleteById('Employee', req.employeeId)
+  .then((employee) => {
+    res.status(200).send({ employee });
+  })
+  .catch(error => next(error));
 });
 
 module.exports = employeesRouter;
