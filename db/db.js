@@ -12,21 +12,33 @@ function getAll(tableName) {
     db.all(sql.getAll(tableName),
       (error, rows) => {
         if (error) {
-          return reject(error);
+          reject(error);
         }
-        return resolve(rows);
+        resolve(rows);
+      });
+  });
+}
+
+function getAllByForeignKey(tableName, key) {
+  return new Promise((resolve, reject) => {
+    db.all(sql.getAllByForeignKey(tableName, key),
+      (error, rows) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(rows);
       });
   });
 }
 
 function getById(tableName, id) {
   return new Promise((resolve, reject) => {
-    db.get(sql.getById('Employee', id),
+    db.get(sql.getById(tableName, id),
       (error, row) => {
         if (error) {
-          return reject(error);
+          reject(error);
         }
-        return resolve(row);
+        resolve(row);
       });
   });
 }
@@ -38,15 +50,15 @@ function updateById(tableName, id, values) {
       db.run(sql.updateById(tableName, id), values,
         (error) => {
           if (error) {
-            return reject(error);
+            reject(error);
           }
         });
       db.get(sql.getById(tableName, id),
         (error, row) => {
           if (error) {
-            return reject(error);
+            reject(error);
           }
-          return resolve(row);
+          resolve(row);
         });
     });
   });
@@ -58,14 +70,14 @@ function insert(tableName, values) {
     db.run(sql.insert(tableName), values,
       function (error) {
         if (error) {
-          return reject(error);
+          reject(error);
         }
         db.get(sql.getById(tableName, this.lastID),
           (error, row) => {
             if (error) {
-              return reject(error);
+              reject(error);
             }
-            return resolve(row);
+            resolve(row);
           });
       });
   });
@@ -78,15 +90,15 @@ function deleteById(tableName, id) {
       db.run(sql.deleteById(tableName, id),
         function (error) {
           if (error) {
-            return reject(error);
+            reject(error);
           }
         });
       db.get(sql.getById(tableName, id),
         (error, row) => {
           if (error) {
-            return reject(error);
+            reject(error);
           }
-          return resolve(row);
+          resolve(row);
         });
     });
   });
@@ -94,7 +106,7 @@ function deleteById(tableName, id) {
 
 module.exports = {
   getAll,
-    // getAllByForeignKey,
+  getAllByForeignKey,
   getById,
   updateById,
   deleteById,
