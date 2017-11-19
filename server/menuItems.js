@@ -9,8 +9,9 @@ menuItemsRouter.get('/', (req, res, next) => {
   .catch(error => next(error));
 });
 
-// middleware for routes that expect a menuItem object on req.body
-// checks whether all necessary fields are present
+// middleware for routes that expect a timesheet object on req.body
+// checks whether all necessary fields are present and consistent within route, request.body and database where applicable
+// and prepares them for sql
 function validateMenuItem(req, res, next) {
   const reqMenuItem = req.body && req.body.menuItem;
 
@@ -59,6 +60,8 @@ menuItemsRouter.param('menuItemId', (req, res, next, id) => {
   })
   .catch(error => next(error));
 });
+
+// no individual get route according to spec
 
 menuItemsRouter.put('/:menuItemId', validateMenuItem, (req, res, next) => {
   db.updateById('MenuItem', req.id, req.values)

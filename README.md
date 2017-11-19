@@ -1,5 +1,32 @@
-inconsistent 'menu items' property in spec menuItems in tests
 # Expresso
+
+v1.0: uses sqlite3
+v2.0: restuctures the project to have database logic only in the db folder and uses promises to expose the results of the database operations
+
+## Parts of the project
+
+### backend
+- db: 
+  - database.sqlite 
+  - db.js -- implements the database logic. Provides results of database queries as promises.
+  - migration.js -- initializes the database
+  - seed.js -- populates the database with sample data
+  - sql.js -- builds the sql statements for db.js
+- server: express routers in different files for the corresponding routes
+  - api.js: first level, no own routes
+  - employees.js: second level 
+  - timesheets.js: third level (under employees)
+  - menus.js: second level
+  - menuItems.js: third level (under menus)
+server.js: server setup
+
+### frontend (given)
+- src: source code for frontend
+- public: frontend (bundled from src)
+
+### test 
+- test.js: complete test suite for database and API (given/adjusted as described in the Comments/Tests section)
+
 
 ## Comments
 
@@ -41,17 +68,10 @@ inconsistent 'menu items' property in spec menuItems in tests
 - nor does calling next() (Program resumes where it left off when calling next only next(error) leaves the function for good.)
 - default status code seems to be 200 
 
-### ToDo or not to do...
+### Ideas for further refactoring
 - switch from values syntax to string interpolation beforehand? => in sql.js iterate over attributes of value settings
 - refactor req.body checks?
 - the routers look so much the same. How to DRY?
-- refactor away passing on errors
-- database check after operation? Also into function?
-
-### unclear
-- Why does string interpolation work only sometimes with the sql statements?
-- How do express and sqlite work together and how to get rid of nested callbacks.
-- How can I move all the database logic to a different file? Returning Promises with retrieved database data and related stuff? Still not clear on that one :( node-sqlite?
 
 ## Project Overview
 

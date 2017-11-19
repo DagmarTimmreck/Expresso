@@ -13,7 +13,7 @@ employeesRouter.get('/', (req, res, next) => {
 
 // middleware for routes that expect an employee object on req.body
 // checks whether all necessary fields are present
-// and prepares them for sql
+// and prepares them as values for sql
 function validateEmployee(req, res, next) {
   const reqEmployee = req.body && req.body.employee;
 
@@ -61,6 +61,8 @@ employeesRouter.use('/:employeeId/timesheets', timesheetsRouter);
 employeesRouter.get('/:employeeId', (req, res, next) => {
   const employee = req.employee;
   res.status(200).send({ employee });
+
+  // no error propagation needed as they are already taken care of in the param middleware
 });
 
 employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
@@ -70,6 +72,9 @@ employeesRouter.put('/:employeeId', validateEmployee, (req, res, next) => {
 });
 
 employeesRouter.delete('/:employeeId', (req, res, next) => {
+
+  // the employee is not deleted from the database but set to 'is_current_employee = 0'
+  // so the response with the updated employee database entry is sent
   db.deleteById('Employee', req.employeeId)
   .then(employee => res.status(200).send({ employee }))
   .catch(error => next(error));

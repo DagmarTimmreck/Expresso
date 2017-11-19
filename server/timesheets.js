@@ -10,7 +10,7 @@ timesheetsRouter.get('/', (req, res, next) => {
 });
 
 // middleware for routes that expect a timesheet object on req.body
-// checks whether all necessary fields are present
+// checks whether all necessary fields are present and consistent within route, request.body and database where applicable
 // and prepares them for sql
 function validateTimesheet(req, res, next) {
   const reqTimesheet = req.body && req.body.timesheet;
@@ -58,6 +58,8 @@ timesheetsRouter.param('timesheetId', (req, res, next, id) => {
   })
   .catch(error => next(error));
 });
+
+// no individual get route according to spec
 
 timesheetsRouter.put('/:timesheetId', validateTimesheet, (req, res, next) => {
   db.updateById('Timesheet', req.timesheetId, req.values)

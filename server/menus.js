@@ -54,6 +54,8 @@ menusRouter.use('/:menuId/menu-items', menuItemsRouter);
 menusRouter.get('/:menuId', (req, res, next) => {
   const menu = req.menu;
   res.status(200).send({ menu });
+
+    // no error propagation needed as they are already taken care of in the param middleware
 });
 
 menusRouter.put('/:menuId', validateMenu, (req, res, next) => {
@@ -63,6 +65,9 @@ menusRouter.put('/:menuId', validateMenu, (req, res, next) => {
 });
 
 menusRouter.delete('/:menuId', (req, res, next) => {
+
+  // if the promise resolves with a result there was a menuItem associated to the menu in question
+  // and thus the menu was not deleted
   db.deleteById('Menu', req.menuId)
   .then((result) => {
     if (!result) {

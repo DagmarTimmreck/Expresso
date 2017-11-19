@@ -1,3 +1,5 @@
+// build sql statements for the various queries in db.js
+
 const toCamelCase = require('to-camel-case');
 
 const dbStructure = {
